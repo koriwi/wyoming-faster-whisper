@@ -25,6 +25,8 @@ class FasterWhisperModel(str, Enum):
     SMALL_INT8 = "small-int8"
     MEDIUM = "medium"
     MEDIUM_INT8 = "medium-int8"
+    LARGE = "large"
+    LARGE_INT8 = "large-int8"
 
 
 EXPECTED_HASHES = {
