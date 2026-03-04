@@ -28,6 +28,7 @@ class ModelLoader:
         compute_type: str,
         device: str,
         beam_size: int,
+        batch_size: int,
         cpu_threads: int,
         initial_prompt: Optional[str],
         vad_parameters: Optional[Dict[str, Any]],
@@ -43,6 +44,7 @@ class ModelLoader:
         self.compute_type = compute_type
         self.device = device
         self.beam_size = beam_size
+        self.batch_size = batch_size
         self.cpu_threads = cpu_threads
         self.initial_prompt = initial_prompt
         self.vad_parameters = vad_parameters
@@ -157,6 +159,7 @@ class ModelLoader:
                     device=self.device,
                     compute_type=self.compute_type,
                     cpu_threads=self.cpu_threads,
+                    batch_size=self.batch_size,
                     vad_parameters=self.vad_parameters,
                 )
 
@@ -177,6 +180,7 @@ class ModelLoader:
             wav_path,
             language=language,
             beam_size=self.beam_size,
+            batch_size=self.batch_size,
             initial_prompt=self.initial_prompt,
         )
         _LOGGER.debug("Transcribed audio: %s", text)

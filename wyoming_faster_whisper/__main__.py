@@ -66,6 +66,12 @@ async def main() -> None:
         help="Size of beam during decoding (0 for auto)",
     )
     parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=0,
+        help="Batch size for batched transcription via BatchedInferencePipeline (0 to disable, faster-whisper only)",
+    )
+    parser.add_argument(
         "--cpu-threads",
         default=4,
         type=int,
@@ -208,6 +214,7 @@ async def main() -> None:
         compute_type=args.compute_type,
         device=args.device,
         beam_size=args.beam_size,
+        batch_size=args.batch_size,
         cpu_threads=args.cpu_threads,
         initial_prompt=args.initial_prompt,
         vad_parameters=vad_parameters,

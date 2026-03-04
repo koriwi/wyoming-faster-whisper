@@ -18,12 +18,14 @@ class FasterWhisperTranscriber(Transcriber):
         device: str = "cpu",
         compute_type: str = "default",
         cpu_threads: int = 4,
+        batch_size: int = 0,
         vad_parameters: Optional[Dict[str, Any]] = None,
     ) -> None:
         self.vad_filter = vad_parameters is not None
         self.vad_parameters = vad_parameters
+        self.batch_size = batch_size
 
-        self.model = faster_whisper.WhisperModel(
+        whisper_model = faster_whisper.WhisperModel(
             model_id,
             download_root=str(cache_dir),
             device=device,
@@ -31,21 +33,37 @@ class FasterWhisperTranscriber(Transcriber):
             cpu_threads=cpu_threads,
         )
 
+        if batch_size > 0:
+            self.model = faster_whisper.BatchedInferencePipeline(model=whisper_model)
+        else:
+            self.model = whisper_model
+
     def transcribe(
         self,
         wav_path: Union[str, Path],
         language: Optional[str],
         beam_size: int = 5,
+        batch_size: int = 0,
         initial_prompt: Optional[str] = None,
     ) -> str:
-        segments, _info = self.model.transcribe(
-            str(wav_path),
-            beam_size=beam_size,
-            language=language,
-            initial_prompt=initial_prompt,
-            vad_filter=self.vad_filter,
-            vad_parameters=self.vad_parameters,
-        )
+        if self.batch_size > 0:
+            segments, _info = self.model.transcribe(
+                str(wav_path),
+                batch_size=self.batch_size,
+                language=language,
+                initial_prompt=initial_prompt,
+                vad_filter=self.vad_filter,
+                vad_parameters=self.vad_parameters,
+            )
+        else:
+            segments, _info = self.model.transcribe(
+                str(wav_path),
+                beam_size=beam_size,
+                language=language,
+                initial_prompt=initial_prompt,
+                vad_filter=self.vad_filter,
+                vad_parameters=self.vad_parameters,
+            )
 
         text = " ".join(segment.text for segment in segments)
         return text
