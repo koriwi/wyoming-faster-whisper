@@ -4,6 +4,7 @@ import asyncio
 import logging
 import os
 import tempfile
+import time
 import wave
 from typing import Optional
 
@@ -82,6 +83,7 @@ class DispatchEventHandler(AsyncEventHandler):
             self._wav_file = None
 
             # Do transcription in a separate thread
+            start_time = time.monotonic()
             text = await asyncio.to_thread(
                 self._transcriber.transcribe,
                 self._wav_path,
@@ -89,8 +91,9 @@ class DispatchEventHandler(AsyncEventHandler):
                 beam_size=self._loader.beam_size,
                 initial_prompt=self._loader.initial_prompt,
             )
+            elapsed = time.monotonic() - start_time
 
-            _LOGGER.info(text)
+            _LOGGER.info("[%.2fs] %s", elapsed, text)
 
             await self.write_event(Transcript(text=text).event())
             _LOGGER.debug("Completed request")
